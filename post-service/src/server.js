@@ -6,7 +6,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const postRoutes = require("./routes/post-routes");
 const errorHandler = require("./middleware/errorHandler");
-const logger = require("./utils/Logger");
+const {logger,getCallerLocation} = require("./utils/Logger");
 
 
 const app = express();
@@ -45,7 +45,7 @@ app.use(
 
 app.use(errorHandler);
  app.listen(PORT, ()=>{
-    logger.info(`Post Service is running on port ${process.env.PORT}`)
+    logger.info(` [${getCallerLocation()}] Post Service is running on port ${process.env.PORT}`)
  })
 
 

@@ -5,7 +5,7 @@ const helmet = require('helmet')
 const {rateLimit}    = require('express-rate-limit')
 const {RedisStore}    = require('rate-limit-redis')
 const Redis = require('ioredis')
-const logger = require('./utils/Logger')
+const { logger,getCallerLocation } = require('./utils/Logger') // Destructure the 'logger' property from the exported object
 const proxy = require('express-http-proxy')
 const errorHandler = require('./middleware/errorhandler')
 const { validate } = require('../../post-service/src/models/Post')
@@ -59,6 +59,12 @@ const proxyOptions = {
 }
 
 //setting up proxy for our identity service
+
+app.use((req, res, next) => {
+  req.redisClient = redisClient; // 👈 this line is required
+  next();
+});
+
 app.use(
   "/v1/auth",
   proxy(process.env.AUTH_SERVICE_URL, {
@@ -69,7 +75,7 @@ app.use(
     },
     userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
       logger.info(
-        `Response received from Identity service: ${proxyRes.statusCode}`
+        ` [${getCallerLocation()}]  Response received from Identity service: ${proxyRes.statusCode}`
       );
 
       return proxyResData;
@@ -93,7 +99,7 @@ app.use(
     },
     userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
       logger.info(
-        `Response received from Post service: ${proxyRes.statusCode}`
+        ` [${getCallerLocation()}] Response received from Post service: ${proxyRes.statusCode}`
       );
 
       return proxyResData;

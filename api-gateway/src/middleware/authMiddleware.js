@@ -1,4 +1,4 @@
-const logger = require("../utils/Logger");
+const {logger} = require("../utils/Logger");
 const jwt = require("jsonwebtoken");
 
 const validateToken = (req, res, next) => {
