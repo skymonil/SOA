@@ -24,11 +24,11 @@ const createPost = async(req,res,)=>{
             });
         }
      
-       const {content, mediaUrls} = req.body
+       const {content, mediaIds} = req.body
        const newlyCreatePost = new Post({
         user: req.user.userId,
         content,
-        mediaUrls: mediaUrls || []
+        mediaIds: mediaIds || []
        })
        await newlyCreatePost.save()
        await invalidatePostCache(req,newlyCreatePost._id.toString())

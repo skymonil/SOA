@@ -1,9 +1,10 @@
 const logger = require('../utils/Logger')
-
+const {uploadToCloudinary}= require('../utils/Cloudinary')
+const Media = require('../models/Media')
 const uploadMedia = async(req,res)=>{
     logger.info("starting media upload")
     try {
-        
+        console.log(req.file)
         if(!req.file){
             logger.error("No file found. Please add a file ")
             return res.status(400).json({
@@ -11,18 +12,18 @@ const uploadMedia = async(req,res)=>{
                 message: "No file found. Add a file and try again"
             })
         }
-        const {originalName,mimeType,buffer}   = req.file
+        const {originalname,mimetype}   = req.file
         const userId = req.user.userId
-        logger.info(`File Details: name=${originalName}, type=${mimeType}`)
+        logger.info(`File Details: name=${originalname}, type=${mimetype}`)
         logger.info("uploading to cloudinary Starting ...")
 
-        const cloudinaryUploadResult = await uploadMedia(req.file)
+        const cloudinaryUploadResult = await uploadToCloudinary(req.file)
         logger.info(`Cloudinary upload successful. Public id -${cloudinaryUploadResult.public_id}`)
 
         const newlyCreatedMedia = new Media({
-            public_id: cloudinaryUploadResult.public_id,
-            originalName,
-            mimeType,
+            publicId: cloudinaryUploadResult.public_id,
+            originalName: originalname,
+            mimeType: mimetype,
             url: cloudinaryUploadResult.secure_url,
             userId
         })
