@@ -7,6 +7,7 @@ const helmet = require("helmet");
 const postRoutes = require("./routes/post-routes");
 const errorHandler = require("./middleware/errorHandler");
 const {logger,getCallerLocation} = require("./utils/Logger");
+const {connectRabbitMQ} = require("./utils/rabbitmq");
 
 
 const app = express();
@@ -44,9 +45,20 @@ app.use(
 );
 
 app.use(errorHandler);
- app.listen(PORT, ()=>{
+
+async function startServer() {
+  try {
+    await connectRabbitMQ()
+     app.listen(PORT, ()=>{
     logger.info(` [${getCallerLocation()}] Post Service is running on port ${process.env.PORT}`)
  })
+  } catch (error) {
+     logger.error(`Error connecting to Rabbit mq`,error)
+     process.exit(1)
+  }
+}
+startServer()
+
 
 
 process.on("unhandledRejection", (reason, promise) => {

@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "amqplib": "^0.10.8",
     "argon2": "^0.43.0",
     "cloudinary": "^2.7.0",
     "cors": "^2.8.5",

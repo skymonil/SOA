@@ -6,7 +6,8 @@ const helmet = require('helmet')
 const errorHandler = require('./utils/errorHandler')
 const mediaRoutes= require('./routes/MediaRoutes')
 const logger = require('./utils/Logger')
-
+const {connectRabbitMQ,consumeEvent,publishEvent}= require('./utils/rabbitmq')
+const handlePostDeleted = require('./eventHandlers/media-event-handlers')
 
 const app = express()
 app.use(cors())
@@ -26,11 +27,24 @@ app.use((req ,res ,next)=>{
 })
 
 app.use('/api/media',mediaRoutes)
-app.use(errorHandler)
-
-app.listen(PORT,()=>{
+async function startServer() {
+  try {
+    await connectRabbitMQ()
+    app.listen(PORT,()=>{
     logger.info(`Media Service is running on ${PORT}`)
 })
+
+//Consume All Events
+await consumeEvent('post.deleted',handlePostDeleted)
+
+  } catch (error) {
+     logger.error(`Error connecting to Rabbit mq`,error)
+     process.exit(1)
+  }
+}
+startServer()
+app.use(errorHandler)
+
 
 
  process.on('unhandledRejection', (reason, promise) =>{
